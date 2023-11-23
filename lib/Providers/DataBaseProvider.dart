@@ -4,9 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sqflite/sqflite.dart' as sql;
-import 'package:path/path.dart' as path;
-import 'package:sqflite/sqflite.dart';
 import 'package:bottom/Models/RemainderModel.dart';
 
 class DataBaseNotifier extends StateNotifier<List<DataModel>> {

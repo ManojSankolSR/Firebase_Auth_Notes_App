@@ -31,24 +31,27 @@ var kColorScheme = ColorScheme.fromSeed(
 );
 final isPlatformDark =
     WidgetsBinding.instance!.window.platformBrightness == Brightness.dark;
-final initTheme = isPlatformDark ? ThemeData.dark() : ThemeData.light();
+final initTheme = isPlatformDark ? dark : light;
 
 final firinstance = FirebaseAuth.instance;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   tz.initializeTimeZones();
+  await Notificationservice().initialiseNotification();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
   runApp(
     ProviderScope(
         child: ThemeProvider(
-      initTheme: light,
+      initTheme: initTheme,
       builder: (p0, theme) {
         return MaterialApp(
-            navigatorKey: navigatorKey, theme: theme, home: NotesApp());
+            themeMode: ThemeMode.system,
+            navigatorKey: navigatorKey,
+            theme: theme,
+            home: NotesApp());
       },
     )),
   );

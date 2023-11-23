@@ -123,6 +123,7 @@ class _NewNoteState extends ConsumerState<NewNoteR> {
 
         if (datetime == null) {
           Notify("Please Select Date", "Error", context, ContentType.failure);
+          return;
         }
         if (datetime!.isBefore(DateTime.now())) {
           Notify("Entered time and date should be in Future", "Error", context,
@@ -336,7 +337,7 @@ class _NewNoteState extends ConsumerState<NewNoteR> {
     //               ),
     //             ),
     //             TextField(
-    //               maxLines: null,
+    //               : null,
     //               style: const TextStyle(
     //                 fontSize: 18,
     //               ),

@@ -1,4 +1,5 @@
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:bottom/Notification.dart';
 import 'package:bottom/Models/RemainderModel.dart';
 import 'package:bottom/Providers/RemainderProvider.dart';
@@ -13,11 +14,9 @@ import 'package:bottom/widgets/HomeScreen/Timelinecontainer.dart';
 import 'package:bottom/widgets/HomeScreen/customContiner.dart';
 import 'package:bottom/widgets/HomeScreen/homelist.dart';
 import 'package:bottom/widgets/notifysnackbar.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
@@ -25,8 +24,9 @@ typedef MyBuilder = void Function(
     BuildContext context, void Function(DateTime dateTime) listfetcher);
 
 class HomeScreen extends ConsumerStatefulWidget {
-  bool? rebuild;
-  HomeScreen({super.key, this.rebuild});
+  HomeScreen({
+    super.key,
+  });
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -44,15 +44,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   List remainders = [];
   DateTime date = DateTime.now();
   bool isDarkMode = false;
+  late AnimationController _animationController;
+  bool _isForward = true;
 
   void initState() {
     super.initState();
-    Notificationservice().initialiseNotification();
 
-    if (widget.rebuild == null) {
-      ref.read(DataBaseProvider.notifier).getData();
-      ref.read(RemainderProvider.notifier).getData();
-    }
+    AwesomeNotifications().setListeners(
+        onActionReceivedMethod: Notificationservice.onActionReceivedMethod,
+        onNotificationDisplayedMethod:
+            Notificationservice.onNotificationDisplayedMethod);
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 500),
+    );
+    ref.read(DataBaseProvider.notifier).getData();
+    ref.read(RemainderProvider.notifier).getData();
 
     _tabController = TabController(length: 2, vsync: this);
   }
@@ -245,6 +252,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ],
         ),
       ),
+    ).then(
+      (value) {
+        if (!_isForward) {
+          _animationController.reverse();
+          _isForward = true;
+        }
+      },
     );
   }
 
@@ -455,6 +469,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           "lib/Assets/images/menu.png",
                           color: _islight ? Colors.white : Colors.black,
                         ),
+                        // child: AnimatedIcon(
+                        //     color: Colors.black,
+                        //     size: 40,
+                        //     icon: AnimatedIcons.menu_close,
+                        //     progress: _animationController),
                       )),
                 ),
                 // Spacer(),
@@ -472,34 +491,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 // ),
                 Spacer(),
                 Material(
-                  elevation: 0,
+                  clipBehavior: Clip.hardEdge,
                   borderRadius: BorderRadius.circular(20),
                   color: _islight ? Colors.black : Colors.white,
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(20),
-                    onTap: showBottom,
+                    onTap: () {
+                      if (_isForward) {
+                        _animationController.forward();
+                        _isForward = false;
+                      }
+                      showBottom();
+                    },
                     child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-
-                        // gradient: LinearGradient(
-                        //     colors: [
-                        //       // Color.fromRGBO(192, 72, 72, 1),
-                        //       // Color.fromRGBO(75, 18, 72, 1),
-                        //       // Color.fromRGBO(11, 135, 147, 1),
-                        //       // Color.fromRGBO(54, 0, 51, 1),
-                        //       Colors.black,
-                        //       Colors.black
-                        //     ],
-                        //     begin: Alignment.topLeft,
-                        //     end: Alignment.bottomRight)
-                      ),
                       padding: EdgeInsets.all(15),
                       child: Row(
                         children: [
-                          Icon(
-                            Icons.add,
-                            color: _islight ? Colors.white : Colors.black,
+                          // Icon(
+                          //   Icons.add,
+                          //   color: _islight ? Colors.white : Colors.black,
+                          // ),
+                          AnimatedIcon(
+                              color: Colors.white,
+                              icon: AnimatedIcons.add_event,
+                              progress: _animationController),
+                          SizedBox(
+                            width: 5,
                           ),
                           Text(
                             "Add Tasks",
@@ -639,11 +655,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               child: NestedScrollView(
                   headerSliverBuilder: (context, innerBoxIsScrolled) {
                     return <Widget>[
-                      SliverToBoxAdapter(
-                        child: SizedBox(
-                          height: 20,
-                        ),
-                      ),
                       // SliverToBoxAdapter(
                       //   child: SafeArea(
                       //     child: Container(
@@ -682,153 +693,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       SliverToBoxAdapter(
                         child: SizedBox(height: 10),
                       ),
-                      // SliverToBoxAdapter(
-                      //     child: Timelinecontainer(
-                      //         changedate: (rdate) {
-                      //           setState(() {
-                      //             date = rdate;
-                      //           });
-                      //         },
-                      //         islight: _islight)),
                       SliverToBoxAdapter(
-                        child: CarouselSlider.builder(
-                          itemCount: notes.length,
-                          itemBuilder: (context, index, realIndex) =>
-                              LayoutBuilder(
-                            builder: (context, constraints) => Stack(children: [
-                              Container(
-                                padding: EdgeInsets.only(left: 20, top: 20),
-                                height: 200,
-                                width: 400,
-                                decoration: BoxDecoration(
-                                    color: Colors
-                                        .primaries[
-                                            index % Colors.primaries.length]
-                                        .shade100,
-                                    borderRadius: BorderRadius.circular(15)),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      notes[index].title.length > 20
-                                          ? "${notes[index].title.characters.take(20)}.."
-                                          : notes[index].title,
-                                      style: TextStyle(
-                                          fontSize: 25,
-                                          color: Colors.primaries[
-                                              index % Colors.primaries.length],
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                    Divider(
-                                      color: Colors.primaries[
-                                          index % Colors.primaries.length],
-                                      thickness: .5,
-                                    ),
-                                    Text(
-                                      notes[index].note.length > 100
-                                          ? "${notes[index].note.characters.take(100)}.."
-                                          : notes[index].note,
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          color: Colors.primaries[
-                                              index % Colors.primaries.length],
-                                          fontWeight: FontWeight.w400),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Positioned(
-                                bottom: 10,
-                                left: 25,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      // color: Colors.blue[200],
-                                      borderRadius: BorderRadius.circular(15)),
-                                  height: constraints.maxHeight * .25,
-                                  width: constraints.maxWidth * .85,
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                              color: _islight
-                                                  ? Colors.white
-                                                  : Colors.black),
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          color: Colors
-                                              .primaries[index %
-                                                  Colors.primaries.length]
-                                              .shade100,
-                                        ),
-                                        padding: EdgeInsets.all(10),
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.calendar_month,
-                                              size: 25,
-                                              color: Colors.primaries[index %
-                                                  Colors.primaries.length],
-                                            ),
-                                            Text(
-                                              formatterForDate
-                                                  .format(notes[index].date),
-                                              style: TextStyle(
-                                                  color: Colors.accents[index %
-                                                      Colors.primaries.length],
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 17),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Spacer(),
-                                      // Container(
-                                      //   decoration: BoxDecoration(
-                                      //     borderRadius:
-                                      //         BorderRadius.circular(15),
-                                      //     color: Colors
-                                      //         .primaries[index %
-                                      //             Colors.primaries.length]
-                                      //         .shade200,
-                                      //   ),
-                                      //   padding: EdgeInsets.all(10),
-                                      //   child: Row(
-                                      //     children: [
-                                      //       Icon(
-                                      //         Icons.alarm,
-                                      //         size: 30,
-                                      //       ),
-                                      //       Text(
-                                      //         formatterForTime
-                                      //             .format(notes[index].date),
-                                      //         style: TextStyle(
-                                      //             color: Colors.primaries[
-                                      //                 index %
-                                      //                     Colors.primaries
-                                      //                         .length],
-                                      //             fontWeight: FontWeight.bold,
-                                      //             fontSize: 17),
-                                      //       ),
-                                      //     ],
-                                      //   ),
-                                      // ),
-                                      // Spacer(),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ]),
-                          ),
-                          options: CarouselOptions(
-                            enlargeCenterPage: true,
-                            autoPlay: true,
-                            autoPlayInterval: Duration(seconds: 10),
-                            height: MediaQuery.of(context).size.height * .26,
-                          ),
-                        ),
-                      ),
+                          child: Timelinecontainer(
+                              changedate: (rdate) {
+                                setState(() {
+                                  date = rdate;
+                                });
+                              },
+                              islight: _islight)),
 
                       SliverToBoxAdapter(
                         child: SizedBox(
@@ -854,7 +726,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                   Color.fromRGBO(54, 0, 51, 100),
                                   Color.fromRGBO(11, 135, 147, 100)
                                 ],
-                                len: notes.length,
                                 title: "All Notes "),
                             Spacer(),
                             customContainer(
@@ -872,7 +743,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                   Color.fromRGBO(192, 72, 72, 100),
                                   Color.fromRGBO(75, 18, 72, 100),
                                 ],
-                                len: remainders.length,
                                 title: "Remainders "),
                             Spacer(),
                           ],

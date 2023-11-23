@@ -11,7 +11,7 @@ import 'package:bottom/Notification.dart';
 
 class customContainer extends StatelessWidget {
   final destination;
-  final int len;
+
   // final String image;
   final List<Color> color;
   final List<Color> Barcolor;
@@ -23,7 +23,7 @@ class customContainer extends StatelessWidget {
       required this.color,
       required this.Barcolor,
       // required this.image,
-      required this.len,
+
       required this.title});
 
   @override
@@ -32,21 +32,19 @@ class customContainer extends StatelessWidget {
         Theme.of(context).brightness == Brightness.light ? true : false;
     // TODO: implement build
     return Material(
-      borderRadius: BorderRadius.circular(15),
       color: _islight ? Colors.black : Colors.white,
+      borderRadius: BorderRadius.circular(15),
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
-        onTap: () {
-          Navigator.push(
-              context,
-              CupertinoPageRoute(
-                builder: (context) => destination,
-              ));
-        },
+        onTap: () => Navigator.push(
+            context,
+            CupertinoPageRoute(
+              builder: (context) => destination,
+            )),
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 15),
           decoration: BoxDecoration(
-              //   boxShadow: [
+              // boxShadow: [
               //   BoxShadow(
               //     color: Colors.black,
               //     spreadRadius: -8,

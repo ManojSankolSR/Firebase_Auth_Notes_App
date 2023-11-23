@@ -1,3 +1,4 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:bottom/Models/DataModel.dart';
 import 'package:bottom/Models/RemainderModel.dart';
 import 'package:bottom/Providers/RemainderProvider.dart';
@@ -9,7 +10,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bottom/Screens/NotesScreen.dart';
 import 'package:animations/animations.dart';
 import 'package:bottom/Providers/DataBaseProvider.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:page_transition/page_transition.dart';
@@ -33,7 +33,7 @@ class showListView extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               LottieBuilder.asset('lib/Assets/images/animation_lltd0cpg.json',
-                  frameRate: FrameRate.max),
+                  height: 500, frameRate: FrameRate.max),
               GradientText(
                 gradientDirection: GradientDirection.ltr,
                 gradientType: GradientType.linear,
@@ -49,22 +49,41 @@ class showListView extends ConsumerWidget {
         : ListView.builder(
             itemCount: notes.length,
             itemBuilder: (context, index) {
+              bool isRemainded = isReminder
+                  ? notes[index].rdate.isBefore(DateTime.now())
+                      ? true
+                      : false
+                  : false;
+              print(" Isremainde $isRemainded");
               return Padding(
                   padding: const EdgeInsets.only(
                       top: 5, bottom: 7, left: 5, right: 5),
-                  child: Slidable(
-                    endActionPane: ActionPane(
-                        extentRatio: .3,
-                        motion: DrawerMotion(),
-                        children: [
-                          SlidableAction(
-                            borderRadius: BorderRadius.only(
-                                topRight: Radius.circular(15),
-                                bottomRight: Radius.circular(15)),
-                            spacing: 2,
-                            padding: EdgeInsets.all(10),
-                            backgroundColor: Colors.green,
-                            onPressed: (context) {
+                  child: Dismissible(
+                    direction: isRemainded
+                        ? DismissDirection.startToEnd
+                        : DismissDirection.horizontal,
+                    secondaryBackground: Container(
+                      padding: EdgeInsets.only(right: 30),
+                      decoration: BoxDecoration(
+                          color: Colors.green,
+                          borderRadius: BorderRadius.circular(15)),
+                      alignment: Alignment.centerRight,
+                      child: Icon(Icons.first_page_sharp),
+                    ),
+                    background: Container(
+                      padding: EdgeInsets.only(left: 30),
+                      decoration: BoxDecoration(
+                          color: Colors.redAccent,
+                          borderRadius: BorderRadius.circular(15)),
+                      alignment: Alignment.centerLeft,
+                      child: Icon(Icons.delete),
+                    ),
+                    key: Key(notes[index].id),
+                    onUpdate: (details) {},
+                    confirmDismiss: isRemainded
+                        ? null
+                        : (direction) async {
+                            if (direction == DismissDirection.endToStart) {
                               Navigator.push(
                                   context,
                                   CupertinoPageRoute(
@@ -80,80 +99,61 @@ class showListView extends ConsumerWidget {
                                                 Colors.primaries.length],
                                           ),
                                   ));
-                            },
-                            icon: Icons.note_alt_rounded,
-                          )
-                        ]),
-                    startActionPane: ActionPane(
-                        extentRatio: .3,
-                        motion: ScrollMotion(),
-                        children: [
-                          SlidableAction(
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(15),
-                                bottomLeft: Radius.circular(15)),
-                            backgroundColor: Colors.red,
-                            onPressed: (context) async {
-                              if (!isReminder) {
-                                final DelNote = await ref
-                                    .read(DataBaseProvider.notifier)
-                                    .delete(notes[index]);
-                                ScaffoldMessenger.of(context).clearSnackBars();
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(SnackBar(
-                                        duration: Duration(seconds: 2),
-                                        content: Row(
-                                          children: [
-                                            const Text("Note Deleted"),
-                                            const Spacer(),
-                                            TextButton(
-                                                onPressed: () async {
-                                                  if (context.mounted) {
-                                                    ScaffoldMessenger.of(
-                                                            context)
-                                                        .clearSnackBars();
-                                                  }
-                                                  ref
-                                                      .read(DataBaseProvider
-                                                          .notifier)
-                                                      .addNote(DelNote);
-                                                },
-                                                child: const Text('Undo...'))
-                                          ],
-                                        )));
-                              }
-                              if (isReminder) {
-                                final DelNote = await ref
-                                    .read(RemainderProvider.notifier)
-                                    .delete(notes[index]);
-                                ScaffoldMessenger.of(context).clearSnackBars();
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(SnackBar(
-                                        duration: Duration(seconds: 2),
-                                        content: Row(
-                                          children: [
-                                            const Text("Note Deleted"),
-                                            const Spacer(),
-                                            TextButton(
-                                                onPressed: () async {
-                                                  ref
-                                                      .read(RemainderProvider
-                                                          .notifier)
-                                                      .addRemainder(DelNote);
-                                                  if (context.mounted) {
-                                                    ScaffoldMessenger.of(
-                                                            context)
-                                                        .clearSnackBars();
-                                                  }
-                                                },
-                                                child: const Text('Undo...'))
-                                          ],
-                                        )));
-                              }
-                            },
-                            icon: Icons.delete,
-                          ),
-                        ]),
+                            }
+                            return false;
+                          },
+                    onDismissed: (direction) async {
+                      if (!isReminder) {
+                        final DelNote = await ref
+                            .read(DataBaseProvider.notifier)
+                            .delete(notes[index]);
+                        ScaffoldMessenger.of(context).clearSnackBars();
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            duration: Duration(seconds: 2),
+                            content: Row(
+                              children: [
+                                const Text("Note Deleted"),
+                                const Spacer(),
+                                TextButton(
+                                    onPressed: () async {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .clearSnackBars();
+                                      }
+                                      ref
+                                          .read(DataBaseProvider.notifier)
+                                          .addNote(DelNote);
+                                    },
+                                    child: const Text('Undo...'))
+                              ],
+                            )));
+                      }
+                      if (isReminder) {
+                        final DelNote = await ref
+                            .read(RemainderProvider.notifier)
+                            .delete(notes[index]);
+                        ScaffoldMessenger.of(context).clearSnackBars();
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            duration: Duration(seconds: 2),
+                            content: Row(
+                              children: [
+                                const Text("Note Deleted"),
+                                const Spacer(),
+                                TextButton(
+                                    onPressed: () async {
+                                      ref
+                                          .read(RemainderProvider.notifier)
+                                          .addRemainder(DelNote);
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .clearSnackBars();
+                                      }
+                                    },
+                                    child: const Text('Undo...'))
+                              ],
+                            )));
+                      }
+                    },
                     child: Material(
                       borderRadius: BorderRadius.circular(13),
                       color: Colors
@@ -163,23 +163,25 @@ class showListView extends ConsumerWidget {
                             .primaries[index % Colors.primaries.length]
                             .shade300,
                         borderRadius: BorderRadius.circular(13),
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              CupertinoPageRoute(
-                                builder: (context) => isReminder
-                                    ? NewNoteR(
-                                        Note: notes[index],
-                                        color: Colors.primaries[
-                                            index % Colors.primaries.length],
-                                      )
-                                    : NewNote(
-                                        Note: notes[index],
-                                        color: Colors.primaries[
-                                            index % Colors.primaries.length],
-                                      ),
-                              ));
-                        },
+                        onTap: isRemainded
+                            ? null
+                            : () {
+                                Navigator.push(
+                                    context,
+                                    CupertinoPageRoute(
+                                      builder: (context) => isReminder
+                                          ? NewNoteR(
+                                              Note: notes[index],
+                                              color: Colors.primaries[index %
+                                                  Colors.primaries.length],
+                                            )
+                                          : NewNote(
+                                              Note: notes[index],
+                                              color: Colors.primaries[index %
+                                                  Colors.primaries.length],
+                                            ),
+                                    ));
+                              },
                         child: Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(13),
@@ -208,9 +210,17 @@ class showListView extends ConsumerWidget {
                                       ),
                                     if (isReminder)
                                       Row(children: [
+                                        if (isRemainded)
+                                          Icon(
+                                            Icons.check_circle_sharp,
+                                            color: Colors.green,
+                                            size: 20,
+                                          ),
                                         Spacer(),
                                         Text(
-                                          "Remainder on",
+                                          isRemainded
+                                              ? "Remainded on"
+                                              : "Remainder on",
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 17,
@@ -334,113 +344,6 @@ class showListView extends ConsumerWidget {
                       ),
                     ),
                   ));
-              // return Padding(
-              //   padding: const EdgeInsets.only(top: 8, bottom: 8),
-              //   child: Dismissible(
-              //     key: Key(notes[index].id),
-              //     onDismissed: (direction) async {
-              //       final DelNote = await ref
-              //           .read(DataBaseProvider.notifier)
-              //           .delete(notes[index]);
-              //       ScaffoldMessenger.of(context).clearSnackBars();
-              //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              //           duration: Duration(seconds: 2),
-              //           content: Row(
-              //             children: [
-              //               const Text("Note Deleted"),
-              //               const Spacer(),
-              //               TextButton(
-              //                   onPressed: () async {
-              //                     if (context.mounted) {
-              //                       ScaffoldMessenger.of(context)
-              //                           .clearSnackBars();
-              //                     }
-              //                     ref
-              //                         .read(DataBaseProvider.notifier)
-              //                         .addNote(DelNote);
-              //                   },
-              //                   child: const Text('Undo...'))
-              //             ],
-              //           )));
-              //     },
-              //     child: InkWell(
-              //       onTap: () {
-              //         Navigator.push(
-              //             context,
-              //             PageTransition(
-              //               child: NewNote(
-              //                 Note: notes[index],
-              //                 color: Colors
-              //                     .primaries[index % Colors.primaries.length],
-              //               ),
-              //               type: PageTransitionType.rightToLeft,
-              //             ));
-              //       },
-              //       child: Container(
-              //         decoration: BoxDecoration(
-              //           borderRadius: BorderRadius.circular(13),
-              //           color:
-              //               Colors.primaries[index % Colors.primaries.length],
-              //         ),
-              //         child: Column(
-              //           children: [
-              //             Padding(
-              //               padding: const EdgeInsets.all(10.0),
-              //               child: Column(
-              //                 children: [
-              //                   Row(
-              //                     children: [
-              //                       Flexible(
-              //                         child: Text(
-              //                           notes[index].title,
-              //                           style: const TextStyle(
-              //                               fontWeight: FontWeight.bold,
-              //                               fontSize: 20),
-              //                         ),
-              //                       ),
-              //                     ],
-              //                   ),
-              //                   Row(
-              //                     children: [
-              //                       Flexible(
-              //                         child: Text(
-              //                           notes[index].note,
-              //                           style: const TextStyle(
-              //                               fontWeight: FontWeight.normal),
-              //                         ),
-              //                       ),
-              //                     ],
-              //                   )
-              //                 ],
-              //               ),
-              //             ),
-              //             Padding(
-              //               padding: const EdgeInsets.all(8.0),
-              //               child: Row(
-              //                 children: [
-              //                   Text(
-              //                     formatterForDate.format(notes[index].date),
-              //                   ),
-              //                   const Spacer(),
-              //                   Text(
-              //                     formatterForTime.format(notes[index].date),
-              //                   ),
-              //                 ],
-              //               ),
-              //             )
-              //           ],
-              //         ),
-              //       ),
-              //     ),
-
-              //     // openBuilder: (context, action) {
-              //     //   return NewItem(
-              //     //     Note: notes[index],
-              //     //     color: Colors.primaries[index % Colors.primaries.length],
-              //     //   );
-              //     // },
-              //   ),
-              // );
             },
           );
   }

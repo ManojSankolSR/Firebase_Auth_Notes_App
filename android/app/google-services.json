@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "101346762354",
+    "firebase_url": "https://notesapp-f6164-default-rtdb.firebaseio.com",
     "project_id": "notesapp-f6164",
     "storage_bucket": "notesapp-f6164.appspot.com"
   },
@@ -13,6 +14,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "101346762354-9ub0egd20l0qid8ns7o7lg81rm0uhfue.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.bottom",
+            "certificate_hash": "3891bc01f831b9d71b2156945c0fda89e1f1455f"
+          }
+        },
         {
           "client_id": "101346762354-b68raptcbf3csth0jm14o7lfbgu05cnd.apps.googleusercontent.com",
           "client_type": 3

@@ -1,4 +1,5 @@
 import 'package:animations/animations.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:bottom/Models/DataModel.dart';
 import 'package:bottom/Models/RemainderModel.dart';
 import 'package:bottom/Providers/DataBaseProvider.dart';
@@ -21,7 +22,6 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:lottie/lottie.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
-import 'package:dotlottie_loader/dotlottie_loader.dart';
 
 final formatterForDate = DateFormat.yMd();
 final formatterForTime = DateFormat('h:mm a');
@@ -37,16 +37,24 @@ class NoteScreen extends ConsumerStatefulWidget {
   ConsumerState<NoteScreen> createState() => _NoteScreen();
 }
 
-class _NoteScreen extends ConsumerState<NoteScreen> {
+class _NoteScreen extends ConsumerState<NoteScreen>
+    with TickerProviderStateMixin {
   ScrollController? _scrollController;
   double kExpandedHeight = 180;
 
   bool _isListView = true;
+  late AnimationController _animationController;
+  late Animation<double> fadeanimation;
 
   @override
   void initState() {
     super.initState();
     ref.read(DataBaseProvider.notifier).getData();
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+    fadeanimation = Tween<double>(begin: 0, end: 1).animate(
+        CurvedAnimation(parent: _animationController, curve: Curves.linear));
+    _animationController.forward();
   }
 
   @override
@@ -117,16 +125,24 @@ class _NoteScreen extends ConsumerState<NoteScreen> {
               onPressed: () {
                 setState(() {
                   _isListView = !_isListView;
+                  print(_animationController.status);
+                  _animationController.reset();
+                  _animationController.forward();
+
+                  // _animationController.forward();
                 });
               },
               icon: Padding(
                 padding: const EdgeInsets.only(right: 20),
-                child: Icon(
-                  _isListView
-                      ? Icons.grid_view_rounded
-                      : Icons.format_list_bulleted,
-                  size: 34,
-                  color: _islight ? Colors.black : Colors.white,
+                child: FadeTransition(
+                  opacity: fadeanimation,
+                  child: Icon(
+                    _isListView
+                        ? Icons.grid_view_rounded
+                        : Icons.format_list_bulleted,
+                    size: 34,
+                    color: _islight ? Colors.black : Colors.white,
+                  ),
                 ),
               )),
         ],
@@ -140,13 +156,19 @@ class _NoteScreen extends ConsumerState<NoteScreen> {
                       color: Colors.black, size: 50),
                 )
               : _isListView
-                  ? showListView(
-                      notes: widget.isRemainder ? remainders : Notes,
-                      isReminder: widget.isRemainder,
+                  ? FadeTransition(
+                      opacity: fadeanimation,
+                      child: showListView(
+                        notes: widget.isRemainder ? remainders : Notes,
+                        isReminder: widget.isRemainder,
+                      ),
                     )
-                  : showGridView(
-                      isRemainder: widget.isRemainder,
-                      Notes: widget.isRemainder ? remainders : Notes,
+                  : FadeTransition(
+                      opacity: fadeanimation,
+                      child: showGridView(
+                        isRemainder: widget.isRemainder,
+                        Notes: widget.isRemainder ? remainders : Notes,
+                      ),
                     ),
         ),
       ),

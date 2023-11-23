@@ -21,6 +21,7 @@ class NewNote extends ConsumerStatefulWidget {
 
 class _NewNoteState extends ConsumerState<NewNote> {
   @override
+  @override
   Widget build(BuildContext context) {
     final _islight =
         Theme.of(context).brightness == Brightness.light ? true : false;
@@ -49,7 +50,8 @@ class _NewNoteState extends ConsumerState<NewNote> {
 
     void save() async {
       if (noteController.text.isEmpty || titleController.text.isEmpty) {
-        _dialoge();
+        Notify(
+            "plesase Enter Some Text", "Error", context, ContentType.failure);
       }
       if (noteController.text.isNotEmpty && titleController.text.isNotEmpty) {
         if (widget.Note == null) {

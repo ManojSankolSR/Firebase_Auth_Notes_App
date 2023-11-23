@@ -1,4 +1,3 @@
-import 'package:animated_icon/animated_icon.dart';
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:bottom/theme_config.dart';
@@ -6,10 +5,33 @@ import 'package:bottom/widgets/notifysnackbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
-class HomeScreenDrawer extends StatelessWidget {
+class HomeScreenDrawer extends StatefulWidget {
   final bool islight;
   HomeScreenDrawer({super.key, required this.islight});
+
+  @override
+  State<HomeScreenDrawer> createState() => _HomeScreenDrawerState();
+}
+
+class _HomeScreenDrawerState extends State<HomeScreenDrawer>
+    with TickerProviderStateMixin {
+  late AnimationController _animationController;
+  @override
+  void initState() {
+    // TODO: implement initState
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(microseconds: 500));
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -22,7 +44,7 @@ class HomeScreenDrawer extends StatelessWidget {
             Container(
               padding: EdgeInsets.only(left: 20),
               color: Theme.of(context).primaryColor,
-              height: MediaQuery.of(context).size.height * .30,
+              height: 240,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -54,27 +76,61 @@ class HomeScreenDrawer extends StatelessWidget {
                         alignment: Alignment.topRight,
                         child: ThemeSwitcher.withTheme(
                           builder: (_, switcher, theme) {
-                            return AnimateIcon(
-                                iconType: IconType.toggleIcon,
-                                animateIcon: AnimateIcons.dayNightWeather,
-                                onTap: () {
+                            return IconButton(
+                                iconSize: 0,
+                                onPressed: () {
+                                  // _animationController.reset();
+                                  _animationController.forward();
+                                  print(_animationController.status);
+                                  // switch (_animationController.status) {
+                                  //   case AnimationStatus.completed:
+                                  //     _animationController.stop();
+                                  //     break;
+                                  //   case AnimationStatus.dismissed:
+                                  //     _animationController.forward();
+                                  //     break;
+                                  //   default:
+                                  // }
+
+                                  // _animationController.reset();
+                                  // _animationController.forward();
+                                  // print(_animationController.upperBound);
                                   switcher.changeTheme(
-                                      isReversed: !islight,
+                                      isReversed: widget.islight,
                                       theme:
                                           theme.brightness == Brightness.light
                                               ? dark
                                               : light);
-                                }
-                                // icon: Icon(
-                                //     islight
-                                //         ? Icons.brightness_3
-                                //         : Icons.sunny,
-                                //     size: 40,
-                                //     color: islight
-                                //         ? Color.fromARGB(
-                                //             255, 255, 81, 0)
-                                //         : Colors.yellow),
-                                );
+                                },
+                                icon: LottieBuilder.asset(
+                                  reverse: false,
+                                  controller: _animationController,
+
+                                  height: 40,
+                                  "lib/Assets/images/day_night.json",
+                                  // controller: _animationController,
+                                ));
+                            // return InkWell(
+                            // onTap: () {
+                            //   switcher.changeTheme(
+                            //       isReversed: !islight,
+                            //       theme: theme.brightness == Brightness.light
+                            //           ? dark
+                            //           : light);
+                            // },
+                            //   child: Icon(Icons.sunny
+
+                            //       // icon: Icon(
+                            //       //     islight
+                            //       //         ? Icons.brightness_3
+                            //       //         : Icons.sunny,
+                            //       //     size: 40,
+                            //       //     color: islight
+                            //       //         ? Color.fromARGB(
+                            //       //             255, 255, 81, 0)
+                            //       //         : Colors.yellow),
+                            //       ),
+                            // );
                           },
                         ),
                       ),
@@ -206,7 +262,7 @@ class HomeScreenDrawer extends StatelessWidget {
                     "Log Out",
                     style: TextStyle(
                         fontSize: 20,
-                        color: islight ? Colors.black : Colors.white),
+                        color: widget.islight ? Colors.black : Colors.white),
                   )
                 ]),
               ),

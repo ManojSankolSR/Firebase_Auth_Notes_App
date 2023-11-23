@@ -31,7 +31,7 @@ class showGridView extends ConsumerWidget {
             // crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               LottieBuilder.asset('lib/Assets/images/animation_lltd0cpg.json',
-                  frameRate: FrameRate.max),
+                  height: 500, frameRate: FrameRate.max),
               GradientText(
                 gradientDirection: GradientDirection.ltr,
                 gradientType: GradientType.linear,
@@ -50,6 +50,11 @@ class showGridView extends ConsumerWidget {
             mainAxisSpacing: 15,
             crossAxisSpacing: 15,
             itemBuilder: (context, index) {
+              bool isRemainded = isRemainder
+                  ? Notes[index].rdate.isBefore(DateTime.now())
+                      ? true
+                      : false
+                  : false;
               return Dismissible(
                 background: Container(
                   decoration: BoxDecoration(
@@ -125,23 +130,25 @@ class showGridView extends ConsumerWidget {
                     splashColor: Colors
                         .primaries[index % Colors.primaries.length].shade300,
                     borderRadius: BorderRadius.circular(12),
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          PageTransition(
-                              child: isRemainder
-                                  ? NewNoteR(
-                                      Note: Notes[index],
-                                      color: Colors.primaries[
-                                          index % Colors.primaries.length],
-                                    )
-                                  : NewNote(
-                                      Note: Notes[index],
-                                      color: Colors.primaries[
-                                          index % Colors.primaries.length],
-                                    ),
-                              type: PageTransitionType.rightToLeft));
-                    },
+                    onTap: isRemainded
+                        ? null
+                        : () {
+                            Navigator.push(
+                                context,
+                                PageTransition(
+                                    child: isRemainder
+                                        ? NewNoteR(
+                                            Note: Notes[index],
+                                            color: Colors.primaries[index %
+                                                Colors.primaries.length],
+                                          )
+                                        : NewNote(
+                                            Note: Notes[index],
+                                            color: Colors.primaries[index %
+                                                Colors.primaries.length],
+                                          ),
+                                    type: PageTransitionType.rightToLeft));
+                          },
                     child: Container(
                       // margin: EdgeInsets.all(5),
 
@@ -161,63 +168,79 @@ class showGridView extends ConsumerWidget {
                                   ),
                                 ),
                               if (isRemainder)
-                                Text(
-                                  "Remainder on",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: Colors.primaries[
-                                        index % Colors.primaries.length],
-                                  ),
-                                ),
-                              if (isRemainder)
-                                SizedBox(
-                                  height: 5,
-                                ),
-                              if (isRemainder)
                                 Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          isRemainded
+                                              ? "Remainded on"
+                                              : "Remainder on",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: Colors.primaries[index %
+                                                Colors.primaries.length],
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 5,
+                                        ),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.calendar_month_outlined,
+                                              size: 20,
+                                              color: Colors.primaries[index %
+                                                  Colors.primaries.length],
+                                            ),
+                                            SizedBox(
+                                              width: 5,
+                                            ),
+                                            Text(
+                                              "${formatterForDate.format(Notes[index].rdate)}",
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                                color: Colors.primaries[index %
+                                                    Colors.primaries.length],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.alarm,
+                                              size: 20,
+                                              color: Colors.primaries[index %
+                                                  Colors.primaries.length],
+                                            ),
+                                            SizedBox(
+                                              width: 5,
+                                            ),
+                                            Text(
+                                              "${formatterForTime.format(Notes[index].rdate)}",
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                                color: Colors.primaries[index %
+                                                    Colors.primaries.length],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                     Icon(
-                                      Icons.calendar_month_outlined,
-                                      size: 20,
-                                      color: Colors.primaries[
-                                          index % Colors.primaries.length],
-                                    ),
-                                    SizedBox(
-                                      width: 5,
-                                    ),
-                                    Text(
-                                      "${formatterForDate.format(Notes[index].rdate)}",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                        color: Colors.primaries[
-                                            index % Colors.primaries.length],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              if (isRemainder)
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.alarm,
-                                      size: 20,
-                                      color: Colors.primaries[
-                                          index % Colors.primaries.length],
-                                    ),
-                                    SizedBox(
-                                      width: 5,
-                                    ),
-                                    Text(
-                                      "${formatterForTime.format(Notes[index].rdate)}",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                        color: Colors.primaries[
-                                            index % Colors.primaries.length],
-                                      ),
-                                    ),
+                                      Icons.check_circle,
+                                      color: Colors.green,
+                                      size: 30,
+                                    )
                                   ],
                                 ),
                               SizedBox(

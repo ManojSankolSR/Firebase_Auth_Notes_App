@@ -10,18 +10,18 @@ class RemainderNotifer extends StateNotifier<List<RemainderModel>> {
   final Notificationservice _notificationservice = Notificationservice();
   RemainderNotifer() : super(const []);
   void addRemainder(RemainderModel remainder) {
-    var a = jsonEncode({
-      "rid": remainder.rid,
+    Map<String, String> a = {
+      "rid": remainder.rid.toString(),
       "id": remainder.id,
       "Title": remainder.title,
       "Note": remainder.note,
       "Added_Date": remainder.date.toString(),
       "Remainder_date": remainder.rdate.toString(),
-    });
-    print(jsonDecode(a)["title"]);
+    };
+    print(a["title"]);
 
-    _notificationservice.sendscheduledNotfication(
-        remainder.rid, remainder.rdate, remainder.title, remainder.note, a);
+    _notificationservice.sendscheduledNotfication(remainder.rid,
+        remainder.rdate, "Remainder", remainder.title, remainder.note, a);
     FirebaseFirestore.instance
         .collection("Users")
         .doc(FirebaseAuth.instance.currentUser!.uid)
@@ -53,18 +53,18 @@ class RemainderNotifer extends StateNotifier<List<RemainderModel>> {
     return delNote;
   }
 
-  void update(RemainderModel remainder) async {
+  Future update(RemainderModel remainder) async {
     // ref.read(idustateprovider.notifier).state = true;
-    var a = jsonEncode({
-      "rid": remainder.rid,
+    Map<String, String> a = {
+      "rid": remainder.rid.toString(),
       "id": remainder.id,
       "Title": remainder.title,
       "Note": remainder.note,
       "Added_Date": remainder.date.toString(),
       "Remainder_date": remainder.rdate.toString(),
-    });
-    _notificationservice.sendscheduledNotfication(
-        remainder.rid, remainder.rdate, remainder.title, remainder.note, a);
+    };
+    _notificationservice.sendscheduledNotfication(remainder.rid,
+        remainder.rdate, "Remainder", remainder.title, remainder.note, a);
     await FirebaseFirestore.instance
         .collection("Users")
         .doc(FirebaseAuth.instance.currentUser!.uid)
@@ -79,7 +79,6 @@ class RemainderNotifer extends StateNotifier<List<RemainderModel>> {
       "Remainder_date": remainder.rdate.toString()
     });
     getData();
-    // ref.read(idustateprovider.notifier).state = false;
   }
 
   Future<List<RemainderModel>> getData() async {

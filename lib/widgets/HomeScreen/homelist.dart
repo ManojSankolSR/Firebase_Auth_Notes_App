@@ -8,7 +8,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:lottie/lottie.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 
@@ -63,32 +62,38 @@ class _homelistState extends ConsumerState<homelist> {
               SliverOverlapInjector(
                   handle:
                       NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
-              SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                childCount: widget.notes.length < 5 ? widget.notes.length : 5,
-                (context, index) {
+              SliverList.builder(
+                itemCount: widget.notes.length < 5 ? widget.notes.length : 5,
+                itemBuilder: (context, index) {
+                  bool isRemainded = widget.isReminder
+                      ? widget.notes[index].rdate.isBefore(DateTime.now())
+                          ? true
+                          : false
+                      : false;
                   return Padding(
                     padding: const EdgeInsets.only(
                         top: 5, bottom: 7, left: 10, right: 10),
                     child: InkWell(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            PageTransition(
-                              child: widget.isReminder
-                                  ? NewNoteR(
-                                      Note: widget.notes[index],
-                                      color: Colors.primaries[
-                                          index % Colors.primaries.length],
-                                    )
-                                  : NewNote(
-                                      Note: widget.notes[index],
-                                      color: Colors.primaries[
-                                          index % Colors.primaries.length],
-                                    ),
-                              type: PageTransitionType.rightToLeft,
-                            ));
-                      },
+                      onTap: isRemainded
+                          ? null
+                          : () {
+                              Navigator.push(
+                                  context,
+                                  PageTransition(
+                                    child: widget.isReminder
+                                        ? NewNoteR(
+                                            Note: widget.notes[index],
+                                            color: Colors.primaries[index %
+                                                Colors.primaries.length],
+                                          )
+                                        : NewNote(
+                                            Note: widget.notes[index],
+                                            color: Colors.primaries[index %
+                                                Colors.primaries.length],
+                                          ),
+                                    type: PageTransitionType.rightToLeft,
+                                  ));
+                            },
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors
@@ -120,9 +125,17 @@ class _homelistState extends ConsumerState<homelist> {
                                     ),
                                   if (widget.isReminder)
                                     Row(children: [
+                                      if (isRemainded)
+                                        Icon(
+                                          Icons.check_circle_sharp,
+                                          color: Colors.green,
+                                          size: 20,
+                                        ),
                                       Spacer(),
                                       Text(
-                                        "Remainder on",
+                                        isRemainded
+                                            ? "Remainded on"
+                                            : "Remainder on",
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 16,
@@ -246,7 +259,7 @@ class _homelistState extends ConsumerState<homelist> {
                     ),
                   );
                 },
-              ))
+              )
             ],
           );
   }

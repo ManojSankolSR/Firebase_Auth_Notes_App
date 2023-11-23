@@ -1,10 +1,6 @@
 import 'package:bottom/main.dart';
 import 'package:flutter/material.dart';
 
-ThemeData lightTheme = ThemeData.light();
-
-ThemeData darkTheme = ThemeData.dark();
-
 ThemeData dark = ThemeData().copyWith(
     colorScheme: kColorScheme,
     brightness: Brightness.dark,

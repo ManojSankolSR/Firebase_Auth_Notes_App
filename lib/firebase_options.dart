@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -28,10 +25,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -49,11 +43,22 @@ class DefaultFirebaseOptions {
     }
   }
 
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyCXwJXPROQGdDlilsEBuBD_U-eiK-fLnVk',
+    appId: '1:101346762354:web:ce5f436172784d85232ceb',
+    messagingSenderId: '101346762354',
+    projectId: 'notesapp-f6164',
+    authDomain: 'notesapp-f6164.firebaseapp.com',
+    databaseURL: 'https://notesapp-f6164-default-rtdb.firebaseio.com',
+    storageBucket: 'notesapp-f6164.appspot.com',
+  );
+
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAtsNUGOzwpitSCEoch1unf-wdlkn7QGA8',
     appId: '1:101346762354:android:f1c5c831cec265d5232ceb',
     messagingSenderId: '101346762354',
     projectId: 'notesapp-f6164',
+    databaseURL: 'https://notesapp-f6164-default-rtdb.firebaseio.com',
     storageBucket: 'notesapp-f6164.appspot.com',
   );
 
@@ -62,8 +67,22 @@ class DefaultFirebaseOptions {
     appId: '1:101346762354:ios:9da662a5814c0174232ceb',
     messagingSenderId: '101346762354',
     projectId: 'notesapp-f6164',
+    databaseURL: 'https://notesapp-f6164-default-rtdb.firebaseio.com',
     storageBucket: 'notesapp-f6164.appspot.com',
+    androidClientId: '101346762354-9ub0egd20l0qid8ns7o7lg81rm0uhfue.apps.googleusercontent.com',
     iosClientId: '101346762354-f5fsehp6msk53vg794c7lvff2m9q1rlu.apps.googleusercontent.com',
     iosBundleId: 'com.example.bottom',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyAMpvgAeQYnpIxKblLTGBMHE8hAlUMWMCg',
+    appId: '1:101346762354:ios:22a90d460dab57ff232ceb',
+    messagingSenderId: '101346762354',
+    projectId: 'notesapp-f6164',
+    databaseURL: 'https://notesapp-f6164-default-rtdb.firebaseio.com',
+    storageBucket: 'notesapp-f6164.appspot.com',
+    androidClientId: '101346762354-9ub0egd20l0qid8ns7o7lg81rm0uhfue.apps.googleusercontent.com',
+    iosClientId: '101346762354-fhivrvqpv80l8dtoke943i8rco1nldug.apps.googleusercontent.com',
+    iosBundleId: 'com.example.bottom.RunnerTests',
   );
 }
