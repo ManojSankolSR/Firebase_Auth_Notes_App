@@ -16,6 +16,9 @@ ThemeData dark = ThemeData().copyWith(
         backgroundColor: kColorScheme.primaryContainer,
       ),
     ),
+    textTheme: ThemeData()
+        .textTheme
+        .copyWith(bodyLarge: TextStyle(color: Colors.white)),
     timePickerTheme: ThemeData().timePickerTheme.copyWith(
           dialBackgroundColor: kColorScheme.primaryContainer,
           hourMinuteTextStyle: TextStyle(fontSize: 50),
@@ -55,6 +58,9 @@ ThemeData light = ThemeData().copyWith(
         backgroundColor: kColorScheme.primaryContainer,
       ),
     ),
+    textTheme: ThemeData()
+        .textTheme
+        .copyWith(bodyLarge: TextStyle(color: Colors.black)),
     iconTheme: ThemeData().iconTheme.copyWith(
           color: const Color.fromRGBO(0, 0, 0, 1),
           size: 35,

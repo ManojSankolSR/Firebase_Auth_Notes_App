@@ -1,21 +1,23 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:bottom/Models/DataModel.dart';
 import 'package:bottom/Models/RemainderModel.dart';
+import 'package:bottom/Providers/BinProvider.dart';
 import 'package:bottom/Providers/RemainderProvider.dart';
 import 'package:bottom/Remainders/NewNoteScreen.dart';
 import 'package:bottom/Screens/NewNoteScreen.dart';
+import 'package:bottom/Screens/BinScreen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bottom/Screens/NotesScreen.dart';
 import 'package:animations/animations.dart';
-import 'package:bottom/Providers/DataBaseProvider.dart';
+import 'package:bottom/Providers/NotesProvider.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 
-class showListView extends ConsumerWidget {
+class showListView extends ConsumerStatefulWidget {
   final List notes;
   final bool isReminder;
   showListView({
@@ -25,9 +27,42 @@ class showListView extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<showListView> createState() => _showListViewState();
+}
+
+class _showListViewState extends ConsumerState<showListView>
+    with TickerProviderStateMixin {
+  late AnimationController _rotateanimationController;
+  late AnimationController _scaleanimationController;
+  late Animation<double> rotateandfadeanimation;
+  late Animation<double> scaleanimation;
+  @override
+  void initState() {
+    // TODO: implement initState
+    _scaleanimationController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+    _rotateanimationController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+    scaleanimation = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(
+        parent: _scaleanimationController, curve: Curves.linear));
+    rotateandfadeanimation = Tween<double>(begin: 0, end: 1).animate(
+        CurvedAnimation(
+            parent: _rotateanimationController, curve: Curves.linear));
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _rotateanimationController.dispose();
+    _scaleanimationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // TODO: implement build
-    return notes.isEmpty
+    return widget.notes.isEmpty
         ? Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -47,14 +82,14 @@ class showListView extends ConsumerWidget {
             ],
           )
         : ListView.builder(
-            itemCount: notes.length,
+            itemCount: widget.notes.length,
             itemBuilder: (context, index) {
-              bool isRemainded = isReminder
-                  ? notes[index].rdate.isBefore(DateTime.now())
+              bool isRemainded = widget.isReminder
+                  ? widget.notes[index].rdate.isBefore(DateTime.now())
                       ? true
                       : false
                   : false;
-              print(" Isremainde $isRemainded");
+
               return Padding(
                   padding: const EdgeInsets.only(
                       top: 5, bottom: 7, left: 5, right: 5),
@@ -63,56 +98,80 @@ class showListView extends ConsumerWidget {
                         ? DismissDirection.startToEnd
                         : DismissDirection.horizontal,
                     secondaryBackground: Container(
-                      padding: EdgeInsets.only(right: 30),
+                      // padding: EdgeInsets.only(right: 30),
                       decoration: BoxDecoration(
-                          color: Colors.green,
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(15)),
                       alignment: Alignment.centerRight,
-                      child: Icon(Icons.first_page_sharp),
+                      child: FadeScaleTransition(
+                        animation: rotateandfadeanimation,
+                        child: RotationTransition(
+                            turns: rotateandfadeanimation,
+                            child: Icon(Icons.first_page_sharp)),
+                      ),
                     ),
                     background: Container(
-                      padding: EdgeInsets.only(left: 30),
+                      // padding: EdgeInsets.only(left: 30),
                       decoration: BoxDecoration(
-                          color: Colors.redAccent,
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(15)),
                       alignment: Alignment.centerLeft,
-                      child: Icon(Icons.delete),
+                      child: FadeTransition(
+                        opacity: rotateandfadeanimation,
+                        child: ScaleTransition(
+                            scale: scaleanimation,
+                            child: Icon(Icons.delete_outline)),
+                      ),
                     ),
-                    key: Key(notes[index].id),
-                    onUpdate: (details) {},
-                    confirmDismiss: isRemainded
-                        ? null
-                        : (direction) async {
-                            if (direction == DismissDirection.endToStart) {
-                              Navigator.push(
-                                  context,
-                                  CupertinoPageRoute(
-                                    builder: (context) => isReminder
-                                        ? NewNoteR(
-                                            Note: notes[index],
-                                            color: Colors.primaries[index %
-                                                Colors.primaries.length],
-                                          )
-                                        : NewNote(
-                                            Note: notes[index],
-                                            color: Colors.primaries[index %
-                                                Colors.primaries.length],
-                                          ),
-                                  ));
-                            }
-                            return false;
-                          },
+                    key: Key(widget.notes[index].id),
+                    onUpdate: (details) {
+                      if (details.progress <= .5 &&
+                          details.direction == DismissDirection.endToStart) {
+                        _rotateanimationController.value = details.progress;
+                      }
+                      if (details.progress <= .5 &&
+                          details.direction == DismissDirection.startToEnd) {
+                        _scaleanimationController.value = details.progress * 4;
+                        _rotateanimationController.value =
+                            details.progress * 1.5;
+                      }
+                    },
+                    confirmDismiss: (direction) async {
+                      if (direction == DismissDirection.endToStart) {
+                        Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                              builder: (context) => widget.isReminder
+                                  ? NewNoteR(
+                                      Note: widget.notes[index],
+                                      color: Colors.primaries[
+                                          index % Colors.primaries.length],
+                                    )
+                                  : NewNote(
+                                      Note: widget.notes[index],
+                                      color: Colors.primaries[
+                                          index % Colors.primaries.length],
+                                    ),
+                            ));
+                        return false;
+                      } else {
+                        return true;
+                      }
+                    },
                     onDismissed: (direction) async {
-                      if (!isReminder) {
+                      if (!widget.isReminder) {
                         final DelNote = await ref
-                            .read(DataBaseProvider.notifier)
-                            .delete(notes[index]);
+                            .read(NotesProvider.notifier)
+                            .delete(widget.notes[index]);
+                        await ref
+                            .read(BinNoteProvider.notifier)
+                            .addNote(DelNote);
                         ScaffoldMessenger.of(context).clearSnackBars();
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                             duration: Duration(seconds: 2),
                             content: Row(
                               children: [
-                                const Text("Note Deleted"),
+                                const Text("Note added to Bin"),
                                 const Spacer(),
                                 TextButton(
                                     onPressed: () async {
@@ -121,33 +180,43 @@ class showListView extends ConsumerWidget {
                                             .clearSnackBars();
                                       }
                                       ref
-                                          .read(DataBaseProvider.notifier)
+                                          .read(NotesProvider.notifier)
                                           .addNote(DelNote);
+                                      ref
+                                          .read(BinNoteProvider.notifier)
+                                          .delNote(DelNote);
                                     },
                                     child: const Text('Undo...'))
                               ],
                             )));
                       }
-                      if (isReminder) {
+                      if (widget.isReminder) {
                         final DelNote = await ref
                             .read(RemainderProvider.notifier)
-                            .delete(notes[index]);
+                            .delete(widget.notes[index]);
+                        ref
+                            .read(BinRemainderProvider.notifier)
+                            .addRemainder(DelNote);
+
                         ScaffoldMessenger.of(context).clearSnackBars();
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                             duration: Duration(seconds: 2),
                             content: Row(
                               children: [
-                                const Text("Note Deleted"),
+                                const Text("Reaminder added to Bin"),
                                 const Spacer(),
                                 TextButton(
                                     onPressed: () async {
-                                      ref
-                                          .read(RemainderProvider.notifier)
-                                          .addRemainder(DelNote);
                                       if (context.mounted) {
                                         ScaffoldMessenger.of(context)
                                             .clearSnackBars();
                                       }
+                                      ref
+                                          .read(RemainderProvider.notifier)
+                                          .addRemainder(DelNote);
+                                      ref
+                                          .read(BinRemainderProvider.notifier)
+                                          .delRemainder(DelNote);
                                     },
                                     child: const Text('Undo...'))
                               ],
@@ -169,14 +238,14 @@ class showListView extends ConsumerWidget {
                                 Navigator.push(
                                     context,
                                     CupertinoPageRoute(
-                                      builder: (context) => isReminder
+                                      builder: (context) => widget.isReminder
                                           ? NewNoteR(
-                                              Note: notes[index],
+                                              Note: widget.notes[index],
                                               color: Colors.primaries[index %
                                                   Colors.primaries.length],
                                             )
                                           : NewNote(
-                                              Note: notes[index],
+                                              Note: widget.notes[index],
                                               color: Colors.primaries[index %
                                                   Colors.primaries.length],
                                             ),
@@ -197,10 +266,10 @@ class showListView extends ConsumerWidget {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    if (!isReminder)
+                                    if (!widget.isReminder)
                                       Text(
                                         DateFormat('EEEE')
-                                            .format(notes[index].date),
+                                            .format(widget.notes[index].date),
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 16,
@@ -208,7 +277,7 @@ class showListView extends ConsumerWidget {
                                               index % Colors.primaries.length],
                                         ),
                                       ),
-                                    if (isReminder)
+                                    if (widget.isReminder)
                                       Row(children: [
                                         if (isRemainded)
                                           Icon(
@@ -239,7 +308,7 @@ class showListView extends ConsumerWidget {
                                           width: 5,
                                         ),
                                         Text(
-                                          "${formatterForDate.format(notes[index].rdate)}",
+                                          "${formatterForDate.format(widget.notes[index].rdate)}",
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 16,
@@ -258,7 +327,7 @@ class showListView extends ConsumerWidget {
                                           width: 5,
                                         ),
                                         Text(
-                                          "${formatterForTime.format(notes[index].rdate)}",
+                                          "${formatterForTime.format(widget.notes[index].rdate)}",
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 16,
@@ -286,7 +355,7 @@ class showListView extends ConsumerWidget {
                                         children: [
                                           Flexible(
                                             child: Text(
-                                              notes[index].title,
+                                              widget.notes[index].title,
                                               style: const TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 16),
@@ -303,7 +372,7 @@ class showListView extends ConsumerWidget {
                                         children: [
                                           Flexible(
                                             child: Text(
-                                              notes[index].note,
+                                              widget.notes[index].note,
                                               style: const TextStyle(
                                                   fontWeight: FontWeight.normal,
                                                   fontSize: 12),
@@ -322,7 +391,7 @@ class showListView extends ConsumerWidget {
                                   children: [
                                     Text(
                                       formatterForDate
-                                          .format(notes[index].date),
+                                          .format(widget.notes[index].date),
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 13),
@@ -330,7 +399,7 @@ class showListView extends ConsumerWidget {
                                     const Spacer(),
                                     Text(
                                       formatterForTime
-                                          .format(notes[index].date),
+                                          .format(widget.notes[index].date),
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 13),

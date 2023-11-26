@@ -78,6 +78,5 @@ class DataBaseNotifier extends StateNotifier<List<DataModel>> {
   }
 }
 
-final DataBaseProvider =
-    StateNotifierProvider<DataBaseNotifier, List<DataModel>>(
-        (ref) => DataBaseNotifier(ref));
+final NotesProvider = StateNotifierProvider<DataBaseNotifier, List<DataModel>>(
+    (ref) => DataBaseNotifier(ref));

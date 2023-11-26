@@ -2,7 +2,7 @@ import 'package:animations/animations.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:bottom/Models/DataModel.dart';
 import 'package:bottom/Models/RemainderModel.dart';
-import 'package:bottom/Providers/DataBaseProvider.dart';
+import 'package:bottom/Providers/NotesProvider.dart';
 import 'package:bottom/Providers/EmailPassProvider.dart';
 import 'package:bottom/Providers/RemainderProvider.dart';
 import 'package:bottom/Remainders/NewNoteScreen.dart';
@@ -49,7 +49,7 @@ class _NoteScreen extends ConsumerState<NoteScreen>
   @override
   void initState() {
     super.initState();
-    ref.read(DataBaseProvider.notifier).getData();
+    ref.read(NotesProvider.notifier).getData();
     _animationController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 500));
     fadeanimation = Tween<double>(begin: 0, end: 1).animate(
@@ -58,10 +58,18 @@ class _NoteScreen extends ConsumerState<NoteScreen>
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final _islight =
         Theme.of(context).brightness == Brightness.light ? true : false;
-    final List<DataModel> Notes = ref.watch(DataBaseProvider);
+    final List<DataModel> Notes = ref.watch(NotesProvider);
     final List<RemainderModel> remainders = ref.watch(RemainderProvider);
     final _load = ref.watch(idustateprovider);
 
@@ -166,6 +174,7 @@ class _NoteScreen extends ConsumerState<NoteScreen>
                   : FadeTransition(
                       opacity: fadeanimation,
                       child: showGridView(
+                        isItUsedInBin: false,
                         isRemainder: widget.isRemainder,
                         Notes: widget.isRemainder ? remainders : Notes,
                       ),

@@ -18,7 +18,6 @@ class RemainderNotifer extends StateNotifier<List<RemainderModel>> {
       "Added_Date": remainder.date.toString(),
       "Remainder_date": remainder.rdate.toString(),
     };
-    print(a["title"]);
 
     _notificationservice.sendscheduledNotfication(remainder.rid,
         remainder.rdate, "Remainder", remainder.title, remainder.note, a);

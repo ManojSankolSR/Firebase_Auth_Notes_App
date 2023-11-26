@@ -67,6 +67,7 @@ dependencies:
   day_night_switch: ^1.0.4
   day_night_switcher: ^0.2.0+1
   awesome_notifications: ^0.8.2
+  fadingpageview: ^1.0.0
  
     
 
@@ -105,6 +106,7 @@ flutter:
     - lib/Assets/images/notelogo.png
     - lib/Assets/images/menu.png
     - lib/Assets/images/day_night.json
+    - lib/Assets/images/logout.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

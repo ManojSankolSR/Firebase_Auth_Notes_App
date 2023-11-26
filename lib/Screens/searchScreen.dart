@@ -1,6 +1,6 @@
 import 'package:bottom/Screens/NotesScreen.dart';
 import 'package:bottom/Models/DataModel.dart';
-import 'package:bottom/Providers/DataBaseProvider.dart';
+import 'package:bottom/Providers/NotesProvider.dart';
 import 'package:bottom/Screens/NewNoteScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -185,7 +185,7 @@ class _searchState extends ConsumerState<search> {
 
   @override
   Widget build(BuildContext context) {
-    Notes = ref.watch(DataBaseProvider);
+    Notes = ref.watch(NotesProvider);
 
     // TODO: implement build
     return Scaffold(

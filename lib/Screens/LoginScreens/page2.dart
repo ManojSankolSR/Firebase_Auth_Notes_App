@@ -1,4 +1,4 @@
-import 'package:bottom/Providers/DataBaseProvider.dart';
+import 'package:bottom/Providers/NotesProvider.dart';
 import 'package:bottom/Providers/EmailPassProvider.dart';
 import 'package:bottom/Screens/LoginScreens/login.dart';
 import 'package:bottom/main.dart';

@@ -1,5 +1,5 @@
 import 'package:bottom/Models/DataModel.dart';
-import 'package:bottom/Providers/DataBaseProvider.dart';
+import 'package:bottom/Providers/NotesProvider.dart';
 import 'package:bottom/Remainders/NewNoteScreen.dart';
 import 'package:bottom/Screens/HomeScreen.dart';
 import 'package:bottom/Screens/NewNoteScreen.dart';

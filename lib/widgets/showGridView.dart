@@ -1,11 +1,13 @@
 import 'package:bottom/Models/DataModel.dart';
+import 'package:bottom/Providers/BinProvider.dart';
 import 'package:bottom/Providers/RemainderProvider.dart';
 import 'package:bottom/Remainders/NewNoteScreen.dart';
 import 'package:bottom/Screens/NewNoteScreen.dart';
+import 'package:bottom/Screens/BinScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:bottom/Providers/DataBaseProvider.dart';
+import 'package:bottom/Providers/NotesProvider.dart';
 import 'package:bottom/Screens/NotesScreen.dart';
 import 'package:animations/animations.dart';
 import 'package:intl/intl.dart';
@@ -16,9 +18,11 @@ import 'package:simple_gradient_text/simple_gradient_text.dart';
 class showGridView extends ConsumerWidget {
   final List Notes;
   final bool isRemainder;
+  final bool isItUsedInBin;
   showGridView({
     required this.isRemainder,
     required this.Notes,
+    required this.isItUsedInBin,
     super.key,
   });
   void snack(BuildContext context) {}
@@ -70,17 +74,101 @@ class showGridView extends ConsumerWidget {
                 ),
                 key: Key(Notes[index].id),
                 onDismissed: (direction) async {
-                  if (!isRemainder) {
-                    final delnote = await ref
-                        .read(DataBaseProvider.notifier)
-                        .delete(Notes[index]);
-                    if (context.mounted) {
+                  if (isItUsedInBin) {
+                    if (!isRemainder) {
+                      ref.read(NotesProvider.notifier).addNote(Notes[index]);
+                      ref.read(BinNoteProvider.notifier).delNote(Notes[index]);
+
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).clearSnackBars();
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            duration: const Duration(seconds: 2),
+                            content: Row(
+                              children: [
+                                const Text("Note Added Back"),
+                                // TextButton(
+                                //     onPressed: () async {
+                                //       if (context.mounted) {
+                                //         ScaffoldMessenger.of(context)
+                                //             .clearSnackBars();
+                                //       }
+                                //     },
+                                //     child: const Text('Undo...'))
+                              ],
+                            )));
+                      }
+                    }
+                    if (isRemainder) {
+                      ref
+                          .read(RemainderProvider.notifier)
+                          .addRemainder(Notes[index]);
+                      ref
+                          .read(BinRemainderProvider.notifier)
+                          .delRemainder(Notes[index]);
                       ScaffoldMessenger.of(context).clearSnackBars();
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          duration: const Duration(seconds: 2),
+                          duration: Duration(seconds: 2),
                           content: Row(
                             children: [
-                              const Text("Note Deleted"),
+                              const Text("Remainder Added Back"),
+                              const Spacer(),
+                              // TextButton(
+                              //     onPressed: () async {
+                              //       if (context.mounted) {
+                              //         ScaffoldMessenger.of(context)
+                              //             .clearSnackBars();
+                              //       }
+                              //     },
+                              //     child: const Text('Undo...'))
+                            ],
+                          )));
+                    }
+                  } else {
+                    if (!isRemainder) {
+                      final delnote = await ref
+                          .read(NotesProvider.notifier)
+                          .delete(Notes[index]);
+                      await ref.read(BinNoteProvider.notifier).addNote(delnote);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).clearSnackBars();
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            duration: const Duration(seconds: 2),
+                            content: Row(
+                              children: [
+                                const Text("Note added to Bin"),
+                                const Spacer(),
+                                TextButton(
+                                    onPressed: () async {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .clearSnackBars();
+                                      }
+                                      ref
+                                          .read(NotesProvider.notifier)
+                                          .addNote(delnote);
+                                      ref
+                                          .read(BinNoteProvider.notifier)
+                                          .delNote(delnote);
+                                    },
+                                    child: const Text('Undo...'))
+                              ],
+                            )));
+                      }
+                    }
+                    if (isRemainder) {
+                      final DelNote = await ref
+                          .read(RemainderProvider.notifier)
+                          .delete(Notes[index]);
+                      ref
+                          .read(BinRemainderProvider.notifier)
+                          .addRemainder(DelNote);
+                      ScaffoldMessenger.of(context).clearSnackBars();
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          duration: Duration(seconds: 2),
+                          content: Row(
+                            children: [
+                              const Text("Remainder Added To Bin"),
+                              const Spacer(),
                               TextButton(
                                   onPressed: () async {
                                     if (context.mounted) {
@@ -88,38 +176,16 @@ class showGridView extends ConsumerWidget {
                                           .clearSnackBars();
                                     }
                                     ref
-                                        .read(DataBaseProvider.notifier)
-                                        .addNote(delnote);
+                                        .read(RemainderProvider.notifier)
+                                        .addRemainder(DelNote);
+                                    ref
+                                        .read(BinRemainderProvider.notifier)
+                                        .delRemainder(DelNote);
                                   },
                                   child: const Text('Undo...'))
                             ],
                           )));
                     }
-                  }
-                  if (isRemainder) {
-                    final DelNote = await ref
-                        .read(RemainderProvider.notifier)
-                        .delete(Notes[index]);
-                    ScaffoldMessenger.of(context).clearSnackBars();
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        duration: Duration(seconds: 2),
-                        content: Row(
-                          children: [
-                            const Text("Note Deleted"),
-                            const Spacer(),
-                            TextButton(
-                                onPressed: () async {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context)
-                                        .clearSnackBars();
-                                  }
-                                  ref
-                                      .read(RemainderProvider.notifier)
-                                      .addRemainder(DelNote);
-                                },
-                                child: const Text('Undo...'))
-                          ],
-                        )));
                   }
                 },
                 child: Material(

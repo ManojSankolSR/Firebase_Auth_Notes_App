@@ -1,6 +1,6 @@
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:bottom/Models/DataModel.dart';
-import 'package:bottom/Providers/DataBaseProvider.dart';
+import 'package:bottom/Providers/NotesProvider.dart';
 import 'package:bottom/widgets/notifysnackbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +55,7 @@ class _NewNoteState extends ConsumerState<NewNote> {
       }
       if (noteController.text.isNotEmpty && titleController.text.isNotEmpty) {
         if (widget.Note == null) {
-          ref.read(DataBaseProvider.notifier).addNote(
+          ref.read(NotesProvider.notifier).addNote(
                 DataModel(
                     id: uuid.v4(),
                     date: DateTime.now(),
@@ -66,7 +66,7 @@ class _NewNoteState extends ConsumerState<NewNote> {
         if (widget.Note != null) {
           if (widget.Note!.note != noteController.text ||
               widget.Note!.title != titleController.text) {
-            ref.read(DataBaseProvider.notifier).update(
+            ref.read(NotesProvider.notifier).update(
                   DataModel(
                       id: widget.Note!.id,
                       date: DateTime.now(),

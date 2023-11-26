@@ -60,6 +60,14 @@ class _NewNoteState extends ConsumerState<NewNoteR> {
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    noteController.dispose();
+    titleController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     bool _isSaved = false;
     void _dialoge() {
